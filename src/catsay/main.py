@@ -2,13 +2,11 @@ from pathlib import Path
 import random
 
 
-def catsay(
+def _catsay(
     text: str,
     reverse: bool = False,
     filepath: Path = Path(__file__).parent / "img/",
-    *args,
-    **kwargs
-) -> None:
+) -> str:
     """the cat says...
     args and kwargs to pass to print"""
     imgs = [i for i in filepath.glob("cat*")]
@@ -19,7 +17,17 @@ def catsay(
         img = f.read()
 
     img = reverse_img(img) if reverse else img
-    print(chat_bubble(text) + "\n" + img, *args, **kwargs)
+    return chat_bubble(text) + "\n" + img
+
+
+def catsay(
+    text: str,
+    reverse: bool = False,
+    filepath: Path = Path(__file__).parent / "img/",
+    *args,
+    **kwargs
+) -> None:
+    print(_catsay(text, reverse, filepath), *args, **kwargs)
 
 
 def chat_bubble(text: str) -> str:
@@ -38,14 +46,16 @@ def reverse_img(img: str, buffer: int = 10) -> str:
     """reverse the cat image"""
     # find max line len
     max_ = 0
-    for l in img.split("\n"):
+    # strip all whitespace from the right of the image
+    lines = [l.rstrip(" ") for l in img.split("\n")]
+    for l in lines:
         if len(l) > max_:
             max_ = len(l)
     # print(max_)
 
     # ensure all images are padded to same line length
     pad_img = []
-    for l in img.split("\n"):
+    for l in lines:
         pad_img.append(l + " " * (max_ - len(l)))
 
     # lookup to reverse chars
